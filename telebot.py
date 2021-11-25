@@ -1,6 +1,13 @@
 import telepot # module to cope telegramm API
-token = '2133949865:AAHxfsbCt0HlKD5QocwR7l2SW17cKpyxp1s' # bot token
-TGbot = telepot.Bot(token) # creating bot object
+
+def readtoken():
+    """function reading bot token from txt file"""
+    token = input('input bot token or press ENTER to read it from token.txt: ')
+    if token != '': return token
+    with open('token.txt', "r") as tokenfile:
+        token = tokenfile.read()
+        print(token)
+        return token
 
 def getmessages(last_upd_id):
     """ function to recieve updates and extract messages from them"""
@@ -33,20 +40,27 @@ def you_d(message):
                                # message, that user'll do it even with the dog
     return None # and returning None othervise
 
-def wearing(message):
+def readdict(filepatch):
+    """ function reading dictionary in format 'misspeled word':'correct one'\
+    from csv file"""
+    words = {}
+    with open(filepatch, "r") as dictfile:
+        for line in dictfile:
+            words[line.split(',')[0]] = line[:-1].split(',')[1]
+        return words
+
+def wearing(message, wear):
     """function for 'misspelling joke' """
-    #dictionary of misspelling and correct spelling
-    wear = {'одел' : 'надел', 'одену' : 'надену', 'одевать' : 'надевать', \
-           'одевал' : 'надевал', 'одеваю' : 'надеваю', 'одето' : 'надето', \
-           'одевала' : 'надевала', 'одела' : 'надела', 'одеть' : 'надеть'\
-            }
     for word in message.split():
         #looking for misspelling and returning correct word
-        print(word)
-        print(wear[word])
         if word.lower() in wear.keys(): return wear[word.lower()]
     return None   #or returning None otherwise
 
+
+token = readtoken()
+TGbot = telepot.Bot(token) # creating bot object
+filepatch = "telebotdict.csv"  #reading misspelling dictionary from csv file
+wear = readdict(filepatch)
 lastmessageid, chatid = 0, 0
 while True: #continiously checking for new updates
     messageslist, lastmessageid, chatid = getmessages(lastmessageid)
@@ -54,7 +68,8 @@ while True: #continiously checking for new updates
         # - iterating trough them, trying to joke
         for message in messageslist:
             # trying to make 'dog joke'
-            print(message)
-            if you_d(message): TGbot.sendMessage(chatid, you_d(message))
+            if you_d(message):
+                TGbot.sendMessage(chatid, you_d(message))
             # truing to make 'misspelling joke'
-            elif wearing(message): TGbot.sendMessage(chatid, wearing(message))
+            elif wearing(message, wear):
+                TGbot.sendMessage(chatid, wearing(message, wear))

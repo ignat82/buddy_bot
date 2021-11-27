@@ -52,17 +52,17 @@ def readdict(filepatch):
             words[line.split(',')[0]] = line[:-1].split(',')[1]
         return words
 
-def wearing(message, wear):
+def wearing(somemessage, wear):
     """function for 'misspelling joke' """
-    for word in message.split():
+    for word in somemessage.split():
         #looking for misspelling and returning correct word
         if word.lower() in wear.keys(): return wear[word.lower()]
     return None   #or returning None otherwise
 
 
-token = readtoken('token.txt')
-TGbot = telepot.Bot(token) # creating bot object
-wear = readdict("telebotdict.csv") #reading misspelling dictionary from csv file
+bottoken = readtoken('token.txt')
+TGbot = telepot.Bot(bottoken) # creating bot object
+weardict = readdict("telebotdict.csv") #reading misspelling dictionary from csv file
 lastmessageid, chatid = 0, 0
 while True: #continiously checking for new updates
     messageslist, lastmessageid, chatid = getmessages(lastmessageid)
@@ -73,5 +73,5 @@ while True: #continiously checking for new updates
             if you_d(message):
                 TGbot.sendMessage(chatid, you_d(message))
             # truing to make 'misspelling joke'
-            elif wearing(message, wear):
-                TGbot.sendMessage(chatid, wearing(message, wear))
+            elif wearing(message, weardict):
+                TGbot.sendMessage(chatid, wearing(message, weardict))

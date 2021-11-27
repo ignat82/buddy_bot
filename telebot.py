@@ -16,9 +16,10 @@ def getmessages(last_upd_id):
     chat = 0
     inp =  None
     messages = []
+    latest_upd_id = last_upd_id
     updates = TGbot.getUpdates(last_upd_id+1)
     for update in updates:
-        last_upd_id = update['update_id']
+        latest_upd_id = update['update_id']
         # if received update contains NOT a message, going to next update
         if not ('message' in update.keys()) \
                 or not ('text' in update['message'].keys()): continue
@@ -26,7 +27,7 @@ def getmessages(last_upd_id):
        # messageid = update['message']['message_id'] going to use later for
                             # answering messages with citation
         messages.append(update['message']['text'])
-    return messages, last_upd_id, chat
+    return messages, latest_upd_id, chat
 
 def you_d(message):
     """ function for 'dog-kidding' """

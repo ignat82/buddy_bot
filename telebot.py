@@ -1,13 +1,15 @@
 import telepot # module to cope telegramm API
 
-def readtoken():
+def readtoken(pathtotokenfile):
     """function reading bot token from txt file"""
-    token = input('input bot token or press ENTER to read it from token.txt: ')
-    if token != '': return token
-    with open('token.txt', "r") as tokenfile:
-        token = tokenfile.read()
-        print(token)
-        return token
+    token = input('input bot token or press ENTER to read it from {}: '\
+                 .format(pathtotokenfile))
+    if token == '': #if input is empty - reading token from file
+        with open(pathtotokenfile, "r") as tokenfile:
+            print('reading token from {}...'.format(pathtotokenfile))
+            token = tokenfile.read()
+    print('using token {}'.format(token))
+    return token
 
 def getmessages(last_upd_id):
     """ function to recieve updates and extract messages from them"""
@@ -17,10 +19,9 @@ def getmessages(last_upd_id):
     updates = TGbot.getUpdates(last_upd_id+1)
     for update in updates:
         last_upd_id = update['update_id']
-        # condition below checks if received update contains NOT a message
+        # if received update contains NOT a message, going to next update
         if not ('message' in update.keys()) \
-                or not ('text' in update['message'].keys()):
-            return [], last_upd_id, 0
+                or not ('text' in update['message'].keys()): continue
         chat = update['message']['chat']['id']
        # messageid = update['message']['message_id'] going to use later for
                             # answering messages with citation
@@ -46,6 +47,8 @@ def readdict(filepatch):
     words = {}
     with open(filepatch, "r") as dictfile:
         for line in dictfile:
+            #saving first word in line as key, and second without last symbol
+            # (that is just \n) as value
             words[line.split(',')[0]] = line[:-1].split(',')[1]
         return words
 
@@ -57,10 +60,9 @@ def wearing(message, wear):
     return None   #or returning None otherwise
 
 
-token = readtoken()
+token = readtoken('token.txt')
 TGbot = telepot.Bot(token) # creating bot object
-filepatch = "telebotdict.csv"  #reading misspelling dictionary from csv file
-wear = readdict(filepatch)
+wear = readdict("telebotdict.csv") #reading misspelling dictionary from csv file
 lastmessageid, chatid = 0, 0
 while True: #continiously checking for new updates
     messageslist, lastmessageid, chatid = getmessages(lastmessageid)
